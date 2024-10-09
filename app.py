@@ -8,8 +8,6 @@ app = Flask(__name__)
 @app.route('/execute', methods=['POST'])
 def execute():
     script_name = request.json.get('script_name')
-    if script_name not in ['fast.py', 'slow.py']:
-        return jsonify({"error": "Invalid script name"}), 400
     
     # Queue the task using Celery
     task = execute_script_task.delay(script_name)
