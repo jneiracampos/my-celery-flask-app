@@ -5,7 +5,7 @@ metadata:
   labels:
     app: celery-flask-app
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: celery-flask-app
@@ -17,6 +17,7 @@ spec:
       containers:
       - name: celery-flask-container
         image: my-celery-flask-app:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 5000
         env:
@@ -28,8 +29,15 @@ spec:
           value: "us-east-2"
         resources:
           requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
             cpu: "500m"
-            memory: "256Mi"
+            memory: "750Mi"
+          limits:
+            cpu: "750m"
+            memory: "950Mi"
+        volumeMounts:
+        - name: celery-results-storage
+          mountPath: /app/celery-results
+      volumes:
+      - name: celery-results-storage
+        persistentVolumeClaim:
+          claimName: celery-results-pvc

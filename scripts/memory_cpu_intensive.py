@@ -15,5 +15,7 @@ def memory_and_cpu_intensive():
 
     fibonacci(35)
 
+    print("Memory and CPU intensive operations completed.")
+
 if __name__ == "__main__":
     memory_and_cpu_intensive()

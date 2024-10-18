@@ -1,0 +1,25 @@
+# Persistent Volume (PV) defines the physical storage in the cluster
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: celery-results-pv
+spec:
+  capacity:
+    storage: 100Mi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/mnt/data/celery-results"
+---
+# Persistent Volume Claim (PVC) defines how the pods request storage from the PV
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: celery-results-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Mi
