@@ -60,6 +60,39 @@ def average_time():
     average_time = total_time / task_count
     return jsonify({"average_time": average_time})
 
+@app.route('/longest-time', methods=['GET'])
+def longest_time():
+    longest_time = 0
+    
+    # Iterate over the results and calculate the longest time
+    for result_file in os.listdir('/app/celery-results'):
+        with open(os.path.join('/app/celery-results', result_file), 'r') as f:
+            result_data = json.load(f)
+            execution_time = result_data.get('execution_time')
+            if execution_time and execution_time > longest_time:
+                longest_time = execution_time
+    
+    if longest_time == 0:
+        return jsonify({"longest_time": "No tasks have been executed yet."})
+    
+    return jsonify({"longest_time": longest_time})
+
+@app.route('/all-execution-times', methods=['GET'])
+def all_execution_times():
+    execution_times = []
+    
+    # Gather all execution times from result files
+    for result_file in os.listdir('/app/celery-results'):
+        with open(os.path.join('/app/celery-results', result_file), 'r') as f:
+            result_data = json.load(f)
+            execution_time = result_data.get('execution_time')
+            if execution_time is not None:
+                execution_times.append(execution_time)
+    
+    if not execution_times:
+        return jsonify({"execution_times": "No tasks have been executed yet."})
+    
+    return jsonify({"execution_times": execution_times})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
