@@ -2,6 +2,9 @@
 minikube start --driver=docker
 minikube start --driver=docker --cpus=4 --memory=8192
 
+# To enable all features please run:
+minikube addons enable metrics-server
+
 # Configure Docker Environment to Use Minikube
 # In CMD:
 @FOR /f "tokens=*" %i IN ('minikube -p minikube docker-env --shell cmd') DO @%i
@@ -19,6 +22,7 @@ kubectl get pvc
 
 # Deployment
 kubectl apply -f k8s/deployment.yaml
+kubectl delete hpa celery-flask-hpa
 
 # Service
 kubectl apply -f k8s/service.yaml
@@ -59,17 +63,28 @@ kubectl port-forward -n monitoring service/grafana 3000:80
 kubectl get secret grafana -n monitoring -o jsonpath="{.data.admin-password}" | base64 --decode
 
 # Set Up Prometheus Data Source in Grafana
-# In Grafana, go to Configuration > Data Sources > Add data source
-# Choose Prometheus and set the URL:
-# http://10.101.43.24:80
-# Save & Test to verify the connection
+In Grafana, go to Configuration > Data Sources > Add data source
+Choose Prometheus and set the URL: http://<CLUSTER-IP>:80 
 
-# Import Pre-built Dashboard in Grafana
-# Go to Dashboard > Import
-# Enter the Dashboard ID (e.g., 6417 for Kubernetes Cluster Monitoring)
-# Select Prometheus as the data source and click Import
+To find the CLUSTER-IP:
+    1. Run kubectl get svc -n monitoring
+    2. Search for CLUSTER-IP in prometheus-server
+
+Save & Test to verify the connection
+
+# Import a Dashboard from `Dashboard.json`
+The `Dashboard.json` file references a specific data source by UID, update the UID in the JSON file to match the UID of your Prometheus data source in Grafana:
+
+To find the UID of the Prometheus data source:
+    1. Go to **Configuration > Data Sources** in Grafana.
+    2. Click on **Prometheus**. The UID is shown in the URL as `/datasources/edit/<UID>`.
+
+Open `Dashboard.json` in a text editor and replace any existing data source UID with the Prometheus UID from your Grafana setup.
+Save the modified `Dashboard.json` file.
+Choose **Upload JSON file** and select your `Dashboard.json` file.
 
 # Additional Commands for Troubleshooting and Management
+
 # View Deployment Details
 kubectl get deployment celery-flask-deployment -o yaml
 

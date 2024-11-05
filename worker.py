@@ -3,7 +3,6 @@ import subprocess
 import os
 import time
 import json
-import logging
 
 app = Celery('worker', broker='sqs://', backend='file:///app/celery-results')
 
