@@ -1,8 +1,9 @@
 from celery import Celery
-import subprocess
+from scripts.memory_cpu_intensive import memory_cpu_intensive
 import os
 import time
 import json
+import logging
 
 app = Celery('worker', broker='sqs://', backend='file:///app/celery-results')
 
@@ -21,28 +22,40 @@ app.conf.update(
     worker_prefetch_multiplier=1,  # Fetch one task at a time
 )
 
+# Logger
+logger = logging.getLogger(__name__)
 
-@app.task
-def execute_script_task(script_name, start_time):
-    script_path = os.path.join('/app/scripts', script_name)
+
+@app.task(bind=True, max_retries=3, default_retry_delay=10)
+def execute_script_task(self, start_time, received_by):
+    executed_by = os.getenv('HOSTNAME', 'unknown_pod')
+    retry_count = self.request.retries
+    task_id = self.request.id
 
     try:
-        result = subprocess.run(['python', script_path], capture_output=True, text=True)
-        
-        # Calculate execution time
+        result = memory_cpu_intensive()
+
         end_time = time.time()
         execution_time = end_time - start_time
 
-        # Save the result and execution time to a file in the shared directory
-        result_file = os.path.join('/app/celery-results', f'celery-task-meta-{execute_script_task.request.id}')
+        # Log success
+        result_file = os.path.join('/app/celery-results', f'celery-task-meta-{self.request.id}')
         with open(result_file, 'w') as f:
             json.dump({
+                'task_id': task_id,
                 'status': 'SUCCESS',
-                'result': result.stdout,
-                'execution_time': execution_time
+                'result': result,
+                'execution_time': execution_time,
+                'received_by': received_by,
+                'executed_by': executed_by,
+                'retry_count': retry_count
             }, f)
         
-        return result.stdout
+        return result
 
     except Exception as e:
-        return f"Error occurred: {str(e)}"
+        logger.exception(f"Error executing task {task_id} - Retry count: {retry_count}")
+
+        # Retry the task if it's a recoverable error
+        raise self.retry(exc=e)
+    

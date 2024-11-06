@@ -22,7 +22,6 @@ kubectl get pvc
 
 # Deployment
 kubectl apply -f k8s/deployment.yaml
-kubectl delete hpa celery-flask-hpa
 
 # Service
 kubectl apply -f k8s/service.yaml
@@ -30,6 +29,7 @@ kubectl apply -f k8s/service.yaml
 # Horizontal Pod Autoscaler (HPA)
 kubectl apply -f k8s/hpa.yaml
 kubectl get hpa
+kubectl delete hpa celery-flask-hpa
 
 # Verify Pods
 kubectl get pods

@@ -1,21 +1,15 @@
 import numpy as np
 
-def memory_and_cpu_intensive():
+def memory_cpu_intensive():
+    array = np.random.rand(10**7)
+    array_sum = np.sum(array)
 
-    # Memory Intensive
-    large_array = np.random.rand(10**7)
-    np.sum(large_array)
-
-    # CPU Intensive
     def fibonacci(n):
         if n <= 1:
             return n
         else:
             return fibonacci(n-1) + fibonacci(n-2)
 
-    fibonacci(35)
+    fib_35 = fibonacci(35)
 
-    print("Memory and CPU intensive operations completed.")
-
-if __name__ == "__main__":
-    memory_and_cpu_intensive()
+    return f"Sum of array: {array_sum}, Fibonacci(35): {fib_35}"

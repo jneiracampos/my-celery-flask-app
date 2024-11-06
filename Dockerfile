@@ -10,4 +10,4 @@ RUN mkdir -p /app/celery-results
 
 EXPOSE 5000
 
-CMD ["bash", "-c", "celery -A worker worker --loglevel=info & python app.py"]
+CMD ["bash", "-c", "celery -A worker worker --loglevel=info --concurrency=1 & python app.py"]
