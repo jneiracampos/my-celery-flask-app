@@ -6,9 +6,9 @@ minikube start --driver=docker --cpus=4 --memory=8192
 minikube addons enable metrics-server
 
 # Configure Docker Environment to Use Minikube
-# In CMD:
+## In CMD:
 @FOR /f "tokens=*" %i IN ('minikube -p minikube docker-env --shell cmd') DO @%i
-# In Ubuntu:
+## In Ubuntu:
 eval $(minikube -p minikube docker-env)
 
 # Build Docker Image
@@ -49,31 +49,31 @@ kubectl get pods
 minikube service celery-flask-service --url
 
 # Configure Prometheus and Grafana for Monitoring
-# Install Helm (if not already installed)
+## Install Helm (if not already installed)
 curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 helm version
 
-# Add Prometheus and Grafana Repositories
+## Add Prometheus and Grafana Repositories
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
 
-# Create Monitoring Namespace
+## Create Monitoring Namespace
 kubectl create namespace monitoring
 
-# Install Prometheus
+## Install Prometheus
 helm install prometheus prometheus-community/prometheus --namespace monitoring
 
-# Install Grafana
+## Install Grafana
 helm install grafana grafana/grafana --namespace monitoring
 
-# Access Grafana Dashboard
+## Access Grafana Dashboard
 kubectl port-forward -n monitoring service/grafana 3000:80
 
-# Retrieve Grafana Default Password
+## Retrieve Grafana Default Password
 kubectl get secret grafana -n monitoring -o jsonpath="{.data.admin-password}" | base64 --decode
 
-# Set Up Prometheus Data Source in Grafana
+## Set Up Prometheus Data Source in Grafana
 In Grafana, go to Configuration > Data Sources > Add data source
 Choose Prometheus and set the URL: http://<CLUSTER-IP>:80 
 
@@ -83,7 +83,7 @@ To find the CLUSTER-IP:
 
 Save & Test to verify the connection
 
-# Import a Dashboard from `Dashboard.json`
+## Import a Dashboard from `Dashboard.json`
 The `Dashboard.json` file references a specific data source by UID, update the UID in the JSON file to match the UID of your Prometheus data source in Grafana:
 
 To find the UID of the Prometheus data source:
