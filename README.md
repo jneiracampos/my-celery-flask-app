@@ -20,8 +20,13 @@ docker images
 kubectl apply -f k8s/pvc.yaml
 kubectl get pvc
 
+# Create a Kubernetes Secret with AWS Credentials
+kubectl create secret generic aws-credentials --from-literal=AWS_ACCESS_KEY_ID=your-access-key-id --from-literal=AWS_SECRET_ACCESS_KEY=your-secret-access-key
+kubectl delete secret aws-credentials
+
 # Deployment
 kubectl apply -f k8s/deployment.yaml
+kubectl delete deployment celery-flask-deployment
 
 # Service
 kubectl apply -f k8s/service.yaml
@@ -30,6 +35,12 @@ kubectl apply -f k8s/service.yaml
 kubectl apply -f k8s/hpa.yaml
 kubectl get hpa
 kubectl delete hpa celery-flask-hpa
+
+# Kubernetes Event-Driven Autoscaling (KEDA)
+kubectl apply --server-side -f https://github.com/kedacore/keda/releases/download/v2.16.0/keda-2.16.0.yaml
+kubectl apply -f k8s/keda.yaml
+kubectl get scaledobject
+kubectl delete scaledobject celery-flask-scaledobject
 
 # Verify Pods
 kubectl get pods
@@ -90,3 +101,6 @@ kubectl get deployment celery-flask-deployment -o yaml
 
 # Describe Horizontal Pod Autoscaler (HPA)
 kubectl describe hpa celery-flask-hpa
+
+# Describe Kubernetes Event-Driven Autoscaling (KEDA)
+kubectl describe scaledobject celery-flask-scaledobject

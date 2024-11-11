@@ -5,7 +5,7 @@ metadata:
   labels:
     app: celery-flask-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: celery-flask-app
@@ -22,9 +22,15 @@ spec:
         - containerPort: 5000
         env:
         - name: AWS_ACCESS_KEY_ID
-          value: "your-access-key-id"
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: AWS_ACCESS_KEY_ID
         - name: AWS_SECRET_ACCESS_KEY
-          value: "your-secret-access-key"
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: AWS_SECRET_ACCESS_KEY
         - name: AWS_DEFAULT_REGION
           value: "us-east-2"
         resources:

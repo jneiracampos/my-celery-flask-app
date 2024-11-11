@@ -33,4 +33,4 @@ spec:
       policies:
         - type: Pods
           value: 4
-          periodSeconds: 30 
+          periodSeconds: 15 

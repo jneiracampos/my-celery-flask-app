@@ -1,4 +1,20 @@
 apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: aws-credentials-auth
+  namespace: default
+spec:
+  secretTargetRef:
+    - parameter: awsAccessKeyID
+      name: aws-credentials
+      key: AWS_ACCESS_KEY_ID
+    - parameter: awsSecretAccessKey
+      name: aws-credentials
+      key: AWS_SECRET_ACCESS_KEY
+
+---
+
+apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
   name: celery-flask-scaledobject
@@ -9,12 +25,26 @@ spec:
     kind: Deployment
     name: celery-flask-deployment
   minReplicaCount: 1
-  maxReplicaCount: 10
+  maxReplicaCount: 20
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleDown:
+          stabilizationWindowSeconds: 30
+          policies:
+            - type: Percent
+              value: 50
+              periodSeconds: 30
+        scaleUp:
+          policies:
+            - type: Pods
+              value: 4
+              periodSeconds: 15
   triggers:
     - type: aws-sqs-queue
+      authenticationRef:
+        name: aws-credentials-auth
       metadata:
         queueURL: https://sqs.us-east-2.amazonaws.com/203918887857/MyQueue
-        region: us-east-2
         queueLength: "5"
-      authenticationRef:
-        name: aws-credentials
+        awsRegion: "us-east-2"
